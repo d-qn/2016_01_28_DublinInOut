@@ -156,14 +156,14 @@ txt <- read.csv(translation_chord.file, row.names = 1, stringsAsFactors = F)
 
 ## Plot setting
 groupnamePadding <- 5
-margin  <- 50
+margin  <- 53
 groupnameFontsize <- 12
 ticklabelFontsize <- 0
 showTicks <- F
 height <- 600
 
-#for(lang in colnames(txt)) {
-for(lang in "IT") {  
+for(lang in colnames(txt)) {
+#for(lang in "IT") {  
   
   chord_outgoing.file <- paste0("chordDublin_outgoing_", lang, ".html")
   chord_incoming.file <- paste0("chordDublin_incoming_", lang, ".html")
@@ -171,11 +171,23 @@ for(lang in "IT") {
   mat <- ot
   pays <- rownames(mat)
   pays[pays != "autres"] <- countryTranslation(pays[pays != "autres"], lang)[,2]
+  if(lang == 'EN') {
+    pays[pays == "United Kingdom"] <- "UK"
+  }
+  
   pays[pays == "autres"] <- txt['otherEUcountries', lang]
   dimnames(mat) <- list(to = pays, from = pays)
-  
+  tooltipGroupConnector <- " &#x25B6; "
+  if(lang == 'AR') {
+    tooltipGroupConnector <- " &#x25C0; "
+    groupnameFontsize <- groupnameFontsize + 1
+  }
+  if(lang == 'JA') {
+    margin <- margin + 7
+  }
+
   # plot chord diagram
-  chord.out <- chorddiag(t(mat), groupnamePadding = groupnamePadding, groupnameFontsize = groupnameFontsize,
+  chord.out <- chorddiag(t(mat), groupnamePadding = groupnamePadding, groupnameFontsize = groupnameFontsize, tooltipGroupConnector = tooltipGroupConnector,
     groupColors = swi_rpal, margin = margin, ticklabelFontsize = ticklabelFontsize, height = height, showTicks = showTicks)
   chord.out$sizingPolicy$browser$defaultWidth <- "100%"
   
@@ -187,7 +199,7 @@ for(lang in "IT") {
     h3 = "",
     source = paste0(txt["source", lang], ": ", 
       htmlLink("http://ec.europa.eu/eurostat/en/web/products-datasets/-/MIGR_DUBTO", txt["source.name", lang]),
-      " | code: ", htmlLink("https://github.com/mattflor/chorddiag", "chorddiagR")),
+      " | ", txt["code", lang], ": ", htmlLink("https://github.com/mattflor/chorddiag", "chorddiagR")),
       author = paste0(htmlLink("https://twitter.com/duc_qn", "Duc-Quang Nguyen"), " - swissinfo.ch"),
       footer = paste0(txt['otherEUcountries', lang], ": ", paste(countryTranslation(iso2agg, lang)[,2], collapse =", "))
   )

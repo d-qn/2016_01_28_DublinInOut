@@ -220,14 +220,14 @@ txt &lt;- read.csv(translation_chord.file, row.names = 1, stringsAsFactors = F)
 
 ## Plot setting
 groupnamePadding &lt;- 5
-margin  &lt;- 50
+margin  &lt;- 53
 groupnameFontsize &lt;- 12
 ticklabelFontsize &lt;- 0
 showTicks &lt;- F
 height &lt;- 600
 
-#for(lang in colnames(txt)) {
-for(lang in &quot;IT&quot;) {  
+for(lang in colnames(txt)) {
+#for(lang in &quot;IT&quot;) {  
   
   chord_outgoing.file &lt;- paste0(&quot;chordDublin_outgoing_&quot;, lang, &quot;.html&quot;)
   chord_incoming.file &lt;- paste0(&quot;chordDublin_incoming_&quot;, lang, &quot;.html&quot;)
@@ -235,11 +235,23 @@ for(lang in &quot;IT&quot;) {
   mat &lt;- ot
   pays &lt;- rownames(mat)
   pays[pays != &quot;autres&quot;] &lt;- countryTranslation(pays[pays != &quot;autres&quot;], lang)[,2]
+  if(lang == 'EN') {
+    pays[pays == &quot;United Kingdom&quot;] &lt;- &quot;UK&quot;
+  }
+  
   pays[pays == &quot;autres&quot;] &lt;- txt['otherEUcountries', lang]
   dimnames(mat) &lt;- list(to = pays, from = pays)
-  
+  tooltipGroupConnector &lt;- &quot; &amp;#x25B6; &quot;
+  if(lang == 'AR') {
+    tooltipGroupConnector &lt;- &quot; &amp;#x25C0; &quot;
+    groupnameFontsize &lt;- groupnameFontsize + 1
+  }
+  if(lang == 'JA') {
+    margin &lt;- margin + 7
+  }
+
   # plot chord diagram
-  chord.out &lt;- chorddiag(t(mat), groupnamePadding = groupnamePadding, groupnameFontsize = groupnameFontsize,
+  chord.out &lt;- chorddiag(t(mat), groupnamePadding = groupnamePadding, groupnameFontsize = groupnameFontsize, tooltipGroupConnector = tooltipGroupConnector,
     groupColors = swi_rpal, margin = margin, ticklabelFontsize = ticklabelFontsize, height = height, showTicks = showTicks)
   chord.out$sizingPolicy$browser$defaultWidth &lt;- &quot;100%&quot;
   
@@ -251,7 +263,7 @@ for(lang in &quot;IT&quot;) {
     h3 = &quot;&quot;,
     source = paste0(txt[&quot;source&quot;, lang], &quot;: &quot;, 
       htmlLink(&quot;http://ec.europa.eu/eurostat/en/web/products-datasets/-/MIGR_DUBTO&quot;, txt[&quot;source.name&quot;, lang]),
-      &quot; | code: &quot;, htmlLink(&quot;https://github.com/mattflor/chorddiag&quot;, &quot;chorddiagR&quot;)),
+      &quot; | &quot;, txt[&quot;code&quot;, lang], &quot;: &quot;, htmlLink(&quot;https://github.com/mattflor/chorddiag&quot;, &quot;chorddiagR&quot;)),
       author = paste0(htmlLink(&quot;https://twitter.com/duc_qn&quot;, &quot;Duc-Quang Nguyen&quot;), &quot; - swissinfo.ch&quot;),
       footer = paste0(txt['otherEUcountries', lang], &quot;: &quot;, paste(countryTranslation(iso2agg, lang)[,2], collapse =&quot;, &quot;))
   )
